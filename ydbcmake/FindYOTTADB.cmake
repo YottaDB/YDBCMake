@@ -45,7 +45,13 @@ find_library(YOTTADB_LIBRARY NAMES yottadb gtmshr
   HINTS $ENV{ydb_dist} $ENV{gtm_dist} ${PC_YOTTADB_LIBRARY_DIRS} )
 
 set(YOTTADB_LIBRARIES ${YOTTADB_LIBRARY})
-set(YOTTADB_PLUGIN_DIR "${YOTTADB_INCLUDE_DIRS}/plugin/")
+set(YOTTADB_PLUGIN_PREFIX "${YOTTADB_INCLUDE_DIRS}/plugin")
+if(M_UTF8_MODE)
+	set(YOTTADB_M_PLUGIN_DIR "${YOTTADB_PLUGIN_PREFIX}/o/utf8")
+else()
+	set(YOTTADB_M_PLUGIN_DIR "${YOTTADB_PLUGIN_PREFIX}/o")
+endif()
+set(YOTTADB_C_PLUGIN_DIR "${YOTTADB_PLUGIN_PREFIX}")
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(YOTTADB  DEFAULT_MSG

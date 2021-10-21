@@ -13,4 +13,4 @@
 set -eu
 
 # No copyright needed on any file in this repo
-exit 0
+exit 1
