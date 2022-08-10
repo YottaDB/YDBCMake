@@ -29,7 +29,7 @@ set(CMAKE_M_CREATE_STATIC_LIBRARY "")
 
 # Option to suppress mumps compiler warnings
 option(M_NOWARNING "Disable warnings and ignore status code from M compiler")
-option(M_EMBED_SOURCE "Embed source code in generated shared object" OFF)
+option(M_EMBED_SOURCE "Embed source code in generated shared object" ON)
 option(M_DYNAMIC_LITERALS "Enable dynamic loading of source code literals" OFF)
 option(M_NOLINE_ENTRY "Compile M code without access to label offsets" OFF)
 
