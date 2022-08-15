@@ -23,8 +23,8 @@
 #
 # For more information, please refer to <http://unlicense.org/>
 
-set(CMAKE_M_CREATE_SHARED_LIBRARY "<CMAKE_C_COMPILER> -shared -o <TARGET> <OBJECTS>")
-set(CMAKE_M_CREATE_SHARED_MODULE "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> -o <TARGET> <OBJECTS>")
+set(CMAKE_M_CREATE_SHARED_LIBRARY "${CC} -shared -o <TARGET> <OBJECTS>")
+set(CMAKE_M_CREATE_SHARED_MODULE "${CC} -shared -o <TARGET> <OBJECTS>")
 set(CMAKE_M_CREATE_STATIC_LIBRARY "")
 
 # Option to suppress mumps compiler warnings
@@ -33,7 +33,7 @@ option(M_EMBED_SOURCE "Embed source code in generated shared object" ON)
 option(M_DYNAMIC_LITERALS "Enable dynamic loading of source code literals" OFF)
 option(M_NOLINE_ENTRY "Compile M code without access to label offsets" OFF)
 
-set(CMAKE_M_COMPILE_OBJECT "LC_ALL=\"${LC_ALL}\" ydb_chset=\"${ydb_chset}\" ydb_icu_version=\"${icu_version}\" <CMAKE_M_COMPILER> -object=<OBJECT>")
+set(CMAKE_M_COMPILE_OBJECT "LC_ALL=C.UTF-8 <FLAGS> <CMAKE_M_COMPILER> -object=<OBJECT>")
 
 if(M_EMBED_SOURCE)
   set(CMAKE_M_COMPILE_OBJECT "${CMAKE_M_COMPILE_OBJECT} -embed_source")
@@ -56,3 +56,37 @@ endif()
 set(CMAKE_M_LINK_EXECUTABLE "")
 
 set(CMAKE_M_OUTPUT_EXTENSION .o)
+
+# See https://jeremimucha.com/2021/02/cmake-functions-and-macros/ for how to parse SOURCES
+function(add_ydb_library library_name)
+	set(flags)
+	set(args)
+	set(listArgs SOURCES)
+	cmake_parse_arguments(arg "${flags}" "${args}" "${listArgs}" ${ARGN})
+
+	if (NOT arg_SOURCES)
+		message(FATAL_ERROR "[add_ydb_library]: SOURCES is a required argument")
+	endif()
+	if (SOURCES IN_LIST arg_KEYWORDS_MISSING_VALUES)
+		message(FATAL_ERROR "[add_ydb_library]: SOURCES requires at least one value")
+	endif()
+	add_library(${library_name}M SHARED ${arg_SOURCES})
+	target_compile_options(${library_name}M PRIVATE ydb_chset=M ydb_icu_version=) 
+	set_target_properties(${library_name}M PROPERTIES PREFIX "")
+	set_target_properties(${library_name}M PROPERTIES LIBRARY_OUTPUT_NAME ${library_name})
+	set_target_properties(${library_name}M PROPERTIES LIBRARY_OUTPUT_DIRECTORY M)
+	if(ydb_icu_version)
+		add_library(${library_name}utf8 SHARED ${arg_SOURCES})
+		target_compile_options(${library_name}utf8 PRIVATE ydb_chset=utf-8 ydb_icu_version=${ydb_icu_version}) 
+		set_target_properties(${library_name}utf8 PROPERTIES PREFIX "")
+		set_target_properties(${library_name}utf8 PROPERTIES LIBRARY_OUTPUT_NAME ${library_name})
+		set_target_properties(${library_name}utf8 PROPERTIES LIBRARY_OUTPUT_DIRECTORY utf8)
+	endif()
+endfunction()
+
+function(install_ydb_library library_name)
+	install(TARGETS ${library_name}M DESTINATION ${YOTTADB_M_PLUGIN_DIR})
+	if(ydb_icu_version)
+		install(TARGETS ${library_name}utf8 DESTINATION ${YOTTADB_M_PLUGIN_DIR}/utf8)
+	endif()
+endfunction()

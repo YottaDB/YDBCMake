@@ -1,0 +1,20 @@
+#################################################################
+#								#
+# Copyright (c) 2022 YottaDB LLC and/or its subsidiaries.	#
+# All rights reserved.						#
+#								#
+#	This source code contains the intellectual property	#
+#	of its copyright holder(s), and is made available	#
+#	under a license.  If you do not know the terms of	#
+#	the license, please stop and do not read further.	#
+#								#
+#################################################################
+FROM yottadb/yottadb-base:latest-master
+WORKDIR /cmake
+ENV DEBIAN_FRONTEND=noninteractive
+RUN ln -fs /usr/share/zoneinfo/US/Eastern /etc/localtime
+RUN apt-get update -qq && apt-get install -y -qq cmake pkg-config libicu-dev
+ADD ydbcmake ydbcmake
+ADD test test
+ADD ci ci
+ENTRYPOINT ci/test_ydb_container.sh

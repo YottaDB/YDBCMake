@@ -1,6 +1,6 @@
 #################################################################
 #								#
-# Copyright (c) 2021 YottaDB LLC and/or its subsidiaries.	#
+# Copyright (c) 2021-2022 YottaDB LLC and/or its subsidiaries.	#
 # All rights reserved.						#
 #								#
 #	This source code contains the intellectual property	#
@@ -13,8 +13,8 @@
 stages:
   - build
 
-.make:
-  stage: build
+services:
+  - docker:dind
 
 commit-verify:
   image: ubuntu:20.04
@@ -26,3 +26,17 @@ commit-verify:
     - wget https://gitlab.com/YottaDB/DB/YDB/-/raw/master/ci/commit_verify.sh
     - chmod +x commit_verify.sh
     - ./commit_verify.sh ci/needs_copyright.sh https://gitlab.com/YottaDB/Tools/YDBCMake
+
+test-ubuntu:
+  image: docker:latest
+  stage: build
+  script:
+    - docker build -f Dockerfile-ubuntu -t cmaketest .
+    - docker run --rm cmaketest
+
+test-rocky:
+  image: docker:latest
+  stage: build
+  script:
+    - docker build -f Dockerfile-rocky -t cmaketest .
+    - docker run --rm cmaketest

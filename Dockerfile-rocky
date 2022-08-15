@@ -1,0 +1,18 @@
+#################################################################
+#								#
+# Copyright (c) 2022 YottaDB LLC and/or its subsidiaries.	#
+# All rights reserved.						#
+#								#
+#	This source code contains the intellectual property	#
+#	of its copyright holder(s), and is made available	#
+#	under a license.  If you do not know the terms of	#
+#	the license, please stop and do not read further.	#
+#								#
+#################################################################
+FROM yottadb/yottadb-rocky-base:latest-master
+WORKDIR /cmake
+RUN dnf install -y cmake pkg-config libicu-devel gcc
+ADD ydbcmake ydbcmake
+ADD test test
+ADD ci ci
+ENTRYPOINT ci/test_ydb_container.sh

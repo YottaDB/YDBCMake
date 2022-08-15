@@ -50,61 +50,31 @@ endif()
 find_path(mumps_dir NAMES mumps
 	HINTS $ENV{ydb_dist} $ENV{gtm_dist} ${PC_YOTTADB_INCLUDEDIR} )
 
-if(M_UTF8_MODE)
-  find_program(PKGCONFIG NAMES pkg-config)
-  if(PKGCONFIG)
-    execute_process(
-      COMMAND ${PKGCONFIG} --modversion icu-io
-      OUTPUT_VARIABLE icu_version
-      RESULT_VARIABLE icu_failed
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    if(icu_failed)
-      message(FATAL_ERROR "Command\n ${PKGCONFIG} --modversion icu-io\nfailed (${icu_failed}).")
-    elseif("x${icu_version}" MATCHES "^x([0-9]+\\.[0-9]+)")
-      set(ydb_icu_version "${CMAKE_MATCH_1}")
-    else()
-      message(FATAL_ERROR "Command\n ${PKGCONFIG} --modversion icu-io\nproduced unrecognized output:\n ${icu_version}")
-    endif()
-  else()
-    message(FATAL_ERROR "Unable to find 'pkg-config'.  Set PKGCONFIG in CMake cache.")
-  endif()
-
-  find_program(LOCALECFG NAMES locale)
-  if(LOCALECFG)
-    execute_process(
-      COMMAND ${LOCALECFG} -a
-      OUTPUT_VARIABLE locale_list
-      RESULT_VARIABLE locale_failed
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    if(locale_failed)
-      message(FATAL_ERROR "Command\n ${LOCALECFG} -a\nfailed (${locale_failed}).")
-    endif()
-    STRING(REGEX REPLACE "\n" ";" locale_list "${locale_list}")
-    foreach(lc ${locale_list})
-      string(TOLOWER "${lc}" lc_lower)
-      if("x${lc_lower}" MATCHES "^x[a-zA-Z_]+\\.?utf-?8")
-        set(LC_ALL ${lc})
-        message("-- Setting locale to ${LC_ALL}")
-        break()
-      endif()
-    endforeach(lc)
-    if("${LC_ALL}" STREQUAL "")
-      message("Locale undefined. Expect to see NONUTF8LOCALE during M routine compilation: ${locale_list}\n")
-    endif()
-  else()
-    message(FATAL_ERROR "Unable to find 'locale'.  Set LOCALECFG in CMake cache.")
-  endif()
-  set(CMAKE_M_COMPILER ${mumps_dir}/utf8/mumps)
-  set(ydb_chset "UTF-8")
-else()
-  set(CMAKE_M_COMPILER ${mumps_dir}/mumps)
+if(EXISTS ${mumps_dir}/utf8)
+	find_program(PKGCONFIG NAMES pkg-config)
+	if(PKGCONFIG)
+	  execute_process(
+	    COMMAND ${PKGCONFIG} --modversion icu-io
+	    OUTPUT_VARIABLE icu_version
+	    RESULT_VARIABLE icu_failed
+	    OUTPUT_STRIP_TRAILING_WHITESPACE
+	    )
+	  if(icu_failed)
+	    message(FATAL_ERROR "Command\n ${PKGCONFIG} --modversion icu-io\nfailed (${icu_failed}).")
+	  elseif("x${icu_version}" MATCHES "^x([0-9]+\\.[0-9]+)")
+		  set(ydb_icu_version "${CMAKE_MATCH_1}" CACHE STRING "ICU Version")
+	  else()
+	    message(FATAL_ERROR "Command\n ${PKGCONFIG} --modversion icu-io\nproduced unrecognized output:\n ${icu_version}")
+	  endif()
+	else()
+	  message(FATAL_ERROR "Unable to find 'pkg-config'.  Set PKGCONFIG in CMake cache.")
+	endif()
 endif()
 
+set(CMAKE_M_COMPILER ${mumps_dir}/mumps)
+set(CMAKE_M_COMPILER_ENV_VAR "mumps")
+find_program(CC NAMES cc REQUIRED)
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/CMakeMCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeMCompiler.cmake
   )
-
-set(CMAKE_M_COMPILER_ENV_VAR "mumps")
