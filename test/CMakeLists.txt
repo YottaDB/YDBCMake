@@ -49,3 +49,6 @@ add_ydb_library(testCMake SOURCES test1.m test2.m)
 
 # Install library
 install_ydb_library(testCMake)
+
+# Optionally, install the sources. This does nothing at runtime, as the sources are not used at all.
+install_ydb_sources(SOURCES test1.m test2.m)
