@@ -33,7 +33,7 @@ option(M_EMBED_SOURCE "Embed source code in generated shared object" ON)
 option(M_DYNAMIC_LITERALS "Enable dynamic loading of source code literals" OFF)
 option(M_NOLINE_ENTRY "Compile M code without access to label offsets" OFF)
 
-set(CMAKE_M_COMPILE_OBJECT "LC_ALL=C.UTF-8 <FLAGS> <CMAKE_M_COMPILER> -object=<OBJECT>")
+set(CMAKE_M_COMPILE_OBJECT "LC_ALL=${LC_ALL} <FLAGS> <CMAKE_M_COMPILER> -object=<OBJECT>")
 
 if(M_EMBED_SOURCE)
   set(CMAKE_M_COMPILE_OBJECT "${CMAKE_M_COMPILE_OBJECT} -embed_source")

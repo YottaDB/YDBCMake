@@ -51,6 +51,7 @@ find_path(mumps_dir NAMES mumps
 	HINTS $ENV{ydb_dist} $ENV{gtm_dist} ${PC_YOTTADB_INCLUDEDIR} )
 
 if(EXISTS ${mumps_dir}/utf8)
+	# Get ICU version
 	find_program(PKGCONFIG NAMES pkg-config)
 	if(PKGCONFIG)
 	  execute_process(
@@ -69,7 +70,38 @@ if(EXISTS ${mumps_dir}/utf8)
 	else()
 	  message(FATAL_ERROR "Unable to find 'pkg-config'.  Set PKGCONFIG in CMake cache.")
 	endif()
+	
+	# Get UTF-8 Locale
+	# Necessary because RHEL 7 does not have C.UTF-8 (https://bugzilla.redhat.com/show_bug.cgi?id=1361965)
+	find_program(LOCALECFG NAMES locale)
+	if(LOCALECFG)
+	  execute_process(
+	    COMMAND ${LOCALECFG} -a
+	    OUTPUT_VARIABLE locale_list
+	    RESULT_VARIABLE locale_failed
+	    OUTPUT_STRIP_TRAILING_WHITESPACE
+	    )
+	  if(locale_failed)
+	    message(FATAL_ERROR "Command\n ${LOCALECFG} -a\nfailed (${locale_failed}).")
+	  endif()
+	  STRING(REGEX REPLACE "\n" ";" locale_list "${locale_list}")
+	  foreach(lc ${locale_list})
+	    string(TOLOWER "${lc}" lc_lower)
+	    if("x${lc_lower}" MATCHES "^x[a-zA-Z_]+\\.?utf-?8")
+	      set(LC_ALL ${lc})
+	      message("-- Setting locale to ${LC_ALL}")
+	      break()
+	    endif()
+	  endforeach(lc)
+	  if("${LC_ALL}" STREQUAL "")
+	    message(FATAL_ERROR "Locale undefined. Need to define a locale in order to compile UTF-8 Objects")
+	  endif()
+	else()
+	  message(FATAL_ERROR "Unable to find 'locale'.  Set LOCALECFG in CMake cache.")
+	endif()
 endif()
+
+
 
 set(CMAKE_M_COMPILER ${mumps_dir}/mumps)
 set(CMAKE_M_COMPILER_ENV_VAR "mumps")
