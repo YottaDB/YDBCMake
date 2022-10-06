@@ -51,26 +51,30 @@ find_path(mumps_dir NAMES mumps
 	HINTS $ENV{ydb_dist} $ENV{gtm_dist} ${PC_YOTTADB_INCLUDEDIR} )
 
 if(EXISTS ${mumps_dir}/utf8)
-	# Get ICU version
-	find_program(PKGCONFIG NAMES pkg-config)
-	if(PKGCONFIG)
-	  execute_process(
-	    COMMAND ${PKGCONFIG} --modversion icu-io
-	    OUTPUT_VARIABLE icu_version
-	    RESULT_VARIABLE icu_failed
-	    OUTPUT_STRIP_TRAILING_WHITESPACE
-	    )
-	  if(icu_failed)
-	    message(FATAL_ERROR "Command\n ${PKGCONFIG} --modversion icu-io\nfailed (${icu_failed}).")
-	  elseif("x${icu_version}" MATCHES "^x([0-9]+\\.[0-9]+)")
-		  set(ydb_icu_version "${CMAKE_MATCH_1}" CACHE STRING "ICU Version")
-	  else()
-	    message(FATAL_ERROR "Command\n ${PKGCONFIG} --modversion icu-io\nproduced unrecognized output:\n ${icu_version}")
-	  endif()
+	if (NOT DEFINED ENV{ydb_icu_version})
+		# Get ICU version
+		find_program(PKGCONFIG NAMES pkg-config)
+		if(PKGCONFIG)
+		  execute_process(
+		    COMMAND ${PKGCONFIG} --modversion icu-io
+		    OUTPUT_VARIABLE icu_version
+		    RESULT_VARIABLE icu_failed
+		    OUTPUT_STRIP_TRAILING_WHITESPACE
+		    )
+		  if(icu_failed)
+		    message(FATAL_ERROR "Command\n ${PKGCONFIG} --modversion icu-io\nfailed (${icu_failed}).")
+		  elseif("x${icu_version}" MATCHES "^x([0-9]+\\.[0-9]+)")
+			  set(ydb_icu_version "${CMAKE_MATCH_1}" CACHE STRING "ICU Version")
+		  else()
+		    message(FATAL_ERROR "Command\n ${PKGCONFIG} --modversion icu-io\nproduced unrecognized output:\n ${icu_version}")
+		  endif()
+		else()
+		  message(FATAL_ERROR "Unable to find 'pkg-config'.  Set PKGCONFIG in CMake cache.")
+		endif()
 	else()
-	  message(FATAL_ERROR "Unable to find 'pkg-config'.  Set PKGCONFIG in CMake cache.")
+		set(ydb_icu_version "$ENV{ydb_icu_version}")
 	endif()
-	
+
 	# Get UTF-8 Locale
 	# Necessary because RHEL 7 does not have C.UTF-8 (https://bugzilla.redhat.com/show_bug.cgi?id=1361965)
 	find_program(LOCALECFG NAMES locale)
