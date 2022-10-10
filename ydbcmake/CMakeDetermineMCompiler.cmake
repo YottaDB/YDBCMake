@@ -72,7 +72,7 @@ if(EXISTS ${mumps_dir}/utf8)
 		  message(FATAL_ERROR "Unable to find 'pkg-config'.  Set PKGCONFIG in CMake cache.")
 		endif()
 	else()
-		set(ydb_icu_version "$ENV{ydb_icu_version}")
+		set(ydb_icu_version "$ENV{ydb_icu_version}" CACHE STRING "ICU Version")
 	endif()
 
 	# Get UTF-8 Locale
