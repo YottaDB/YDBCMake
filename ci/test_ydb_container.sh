@@ -33,3 +33,24 @@ echo $ydb_routines
 yottadb -r test1
 yottadb -r test2
 . /opt/yottadb/current/ydb_env_unset
+
+echo "Edit file, re-cmake, make..."
+echo " write 42,!" >> ../test/test2.m
+cmake ../test
+make && make install
+
+echo "Running M mode code..."
+export ydb_chset="M"
+. /opt/yottadb/current/ydb_env_set
+echo $ydb_routines
+yottadb -r test1
+yottadb -r test2
+. /opt/yottadb/current/ydb_env_unset
+
+echo "Running UTF-8 mode code..."
+export ydb_chset="UTF-8"
+. /opt/yottadb/current/ydb_env_set
+echo $ydb_routines
+yottadb -r test1
+yottadb -r test2
+. /opt/yottadb/current/ydb_env_unset
