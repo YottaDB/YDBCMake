@@ -23,8 +23,8 @@
 #
 # For more information, please refer to <http://unlicense.org/>
 
-set(CMAKE_M_CREATE_SHARED_LIBRARY "${CC} -shared -o <TARGET> <OBJECTS>")
-set(CMAKE_M_CREATE_SHARED_MODULE "${CC} -shared -o <TARGET> <OBJECTS>")
+set(CMAKE_M_CREATE_SHARED_LIBRARY "${CC} -shared -z noexecstack -o <TARGET> <OBJECTS>")
+set(CMAKE_M_CREATE_SHARED_MODULE "${CC} -shared -z noexecstack -o <TARGET> <OBJECTS>")
 set(CMAKE_M_CREATE_STATIC_LIBRARY "")
 
 # Option to suppress mumps compiler warnings
@@ -71,13 +71,13 @@ function(add_ydb_library library_name)
 		message(FATAL_ERROR "[add_ydb_library]: SOURCES requires at least one value")
 	endif()
 	add_library(${library_name}M SHARED ${arg_SOURCES})
-	target_compile_options(${library_name}M PRIVATE ydb_chset=M ydb_icu_version=) 
+	target_compile_options(${library_name}M PRIVATE ydb_chset=M ydb_icu_version=)
 	set_target_properties(${library_name}M PROPERTIES PREFIX "")
 	set_target_properties(${library_name}M PROPERTIES LIBRARY_OUTPUT_NAME ${library_name})
 	set_target_properties(${library_name}M PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 	if(ydb_icu_version)
 		add_library(${library_name}utf8 SHARED ${arg_SOURCES})
-		target_compile_options(${library_name}utf8 PRIVATE ydb_chset=utf-8 ydb_icu_version=${ydb_icu_version}) 
+		target_compile_options(${library_name}utf8 PRIVATE ydb_chset=utf-8 ydb_icu_version=${ydb_icu_version})
 		set_target_properties(${library_name}utf8 PROPERTIES PREFIX "")
 		set_target_properties(${library_name}utf8 PROPERTIES LIBRARY_OUTPUT_NAME ${library_name})
 		set_target_properties(${library_name}utf8 PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/utf8)
