@@ -23,8 +23,8 @@
 #
 # For more information, please refer to <http://unlicense.org/>
 
-set(CMAKE_M_CREATE_SHARED_LIBRARY "${CC} -shared -z noexecstack -o <TARGET> <OBJECTS>")
-set(CMAKE_M_CREATE_SHARED_MODULE "${CC} -shared -z noexecstack -o <TARGET> <OBJECTS>")
+set(CMAKE_M_CREATE_SHARED_LIBRARY "${ldgold} -shared -z noexecstack -o <TARGET> <OBJECTS>")
+set(CMAKE_M_CREATE_SHARED_MODULE "${ldgold} -shared -z noexecstack -o <TARGET> <OBJECTS>")
 set(CMAKE_M_CREATE_STATIC_LIBRARY "")
 
 # Option to suppress mumps compiler warnings
