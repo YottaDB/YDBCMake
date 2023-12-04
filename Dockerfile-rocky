@@ -11,7 +11,7 @@
 #################################################################
 FROM yottadb/yottadb-rocky-base:latest-master
 WORKDIR /cmake
-RUN dnf install -y cmake pkg-config libicu-devel gcc
+RUN dnf install -y cmake pkg-config libicu-devel
 ADD ydbcmake ydbcmake
 ADD test test
 ADD ci ci
