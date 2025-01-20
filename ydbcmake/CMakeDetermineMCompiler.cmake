@@ -109,8 +109,8 @@ endif()
 
 set(CMAKE_M_COMPILER ${mumps_dir}/mumps)
 set(CMAKE_M_COMPILER_ENV_VAR "mumps")
-find_program(ldgold NAMES ld.gold REQUIRED)
+find_program(ld NAMES ld REQUIRED)
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/CMakeMCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeMCompiler.cmake
-  )
+)
